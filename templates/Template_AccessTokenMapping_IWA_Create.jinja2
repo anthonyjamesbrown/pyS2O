@@ -1,0 +1,39 @@
+{
+  "id": "authz_req|IWA|{{pfClientId}}",
+  "context": {
+    "type": "IDP_ADAPTER",
+    "contextRef": {
+      "id": "IWA"
+    }
+  },
+  "accessTokenManagerRef": {
+    "id": "{{pfClientId}}"
+  },
+  "attributeSources": [
+    {
+      "type": "LDAP",
+      "dataStoreRef": {
+        "id": "{{pfDataStoreId}}"
+      },
+      "id": "VDS",
+      "description": "VDS",
+      "baseDn": "ou=users,o=company",
+      "searchScope": "ONE_LEVEL",
+      "searchFilter": "(&(objectClass=user)({{pfUserKeyAttribute}}=${USER_KEY}))",
+      "binaryAttributeSettings": {},
+      "memberOfNestedGroup": false
+    }
+  ],
+  "attributeContractFulfillment": {
+    "user_principal_name": {
+      "source": {
+        "type": "LDAP_DATA_STORE",
+        "id": "VDS"
+      },
+      "value": "{{pfUserKeyAttribute}}"
+    }
+  },
+  "issuanceCriteria": {
+    "conditionalCriteria": []
+  }
+}

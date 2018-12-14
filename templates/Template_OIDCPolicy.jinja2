@@ -1,0 +1,125 @@
+{
+  "id": "{{pfClientId}}",
+  "name": "{{pfClientId}}",
+  "accessTokenManagerRef": {
+    "id": "{{pfClientId}}"
+  },
+  "includeSriInIdToken": true,
+  "includeUserInfoInIdToken": true,
+  "attributeContract": {
+    "coreAttributes": [
+      {
+        "name": "sub"
+      }
+    ],
+    "extendedAttributes": [
+      {
+        "name": "userPrincipalName"
+      },
+      {
+        "name": "employeeID"
+      },
+      {
+        "name": "given_name"
+      },
+      {
+        "name": "family_name"
+      },
+      {%- if pfIncludeGroups %}
+      {
+        "name": "groups"
+      },
+      {%- endif %}
+      {
+        "name": "name"
+      }
+    ]
+  },
+  "attributeMapping": {
+    "attributeSources": [
+      {
+        "type": "LDAP",
+        "dataStoreRef": {
+        "id": "{{pfVDSDataStoreId}}"
+        },
+        "id": "VDS",
+        "description": "VDS",
+        "baseDn": "ou=users,o=company",
+        "searchScope": "ONE_LEVEL",
+      "searchFilter": "(&(objectClass=user)(userPrincipalName=${user_principal_name}))",
+        "binaryAttributeSettings": {
+          
+        },
+        "memberOfNestedGroup": false
+      }
+    ],
+    "attributeContractFulfillment": {
+      "sub": {
+        "source": {
+          "type": "LDAP_DATA_STORE",
+          "id": "VDS"
+        },
+        "value": "employeeID"
+      },
+      "userPrincipalName": {
+        "source": {
+          "type": "LDAP_DATA_STORE",
+          "id": "VDS"
+        },
+        "value": "userPrincipalName"
+      },
+      "employeeID": {
+        "source": {
+          "type": "LDAP_DATA_STORE",
+          "id": "VDS"
+        },
+        "value": "employeeID"
+      },
+      "given_name": {
+        "source": {
+          "type": "LDAP_DATA_STORE",
+          "id": "VDS"
+        },
+        "value": "givenName"
+      },
+      "family_name": {
+        "source": {
+          "type": "LDAP_DATA_STORE",
+          "id": "VDS"
+        },
+        "value": "sn"
+      },
+      {%- if pfIncludeGroups %}
+      "groups": {
+        "source": {
+          "type": "EXPRESSION"
+        },
+        "value": "#UserGroups = new java.util.ArrayList(), #groups = #this.get(\"ds.VDS.memberOf\") != null ? #this.get(\"ds.VDS.memberOf\").getValues() : {}, #groups.{ #group = #this,  #group = new javax.naming.ldap.LdapName(#group),  #cn = #group.getRdn(#group.size() - 1).getValue().toString(), #UserGroups.add(#cn) }, #UserGroups != null ? new org.sourceid.saml20.adapter.attribute.AttributeValue(#UserGroups) : null"
+      },
+      {%- endif %}
+      "name": {
+        "source": {
+          "type": "LDAP_DATA_STORE",
+          "id": "VDS"
+        },
+        "value": "displayName"
+      }
+    },
+    "issuanceCriteria": {
+      "conditionalCriteria": []{%- if pfRestrictIPInternal or pfRestrictToGroup %},
+      "expressionCriteria": [
+        {%- if pfRestrictIPInternal %}
+        {
+            "errorResult": "Access to this application is retricted to the internal company network. Please access this application from the company network or VPN (RFC 1918 IP space).",
+            "expression": "#isClientIPInternal = @com.pingidentity.sdk.CIDROperations@isInRange(#this.get(\"context.ClientIp\"),\"10.0.0.0/8\") || @com.pingidentity.sdk.CIDROperations@isInRange(#this.get(\"context.ClientIp\"),\"172.16.0.0/12\") || @com.pingidentity.sdk.CIDROperations@isInRange(#this.get(\"context.ClientIp\"),\"192.168.0.0/16\") || @com.pingidentity.sdk.CIDROperations@isInRange(#this.get(\"context.ClientIp\"),\"100.64.0.0/10\"), #isClientIPInternal"
+        }{% endif %}{%- if pfRestrictIPInternal and pfRestrictToGroup %},{%- endif %}
+        {%- if pfRestrictToGroup %}
+        {
+            "errorResult": "Access to this application is retricted to members of the {{pfRestrictedGroup}} AD group.",
+            "expression": "#groupString = \"{{pfRestrictedGroup}}\", #authorized = false, #this.get(\"ds.VDS.memberOf\") == null ? null : ( #groups = #this.get(\"ds.VDS.memberOf\").getValues(), #groups.{ #group = #this,#group = new javax.naming.ldap.LdapName(#group), #cn = #group.getRdn(#group.size() - 1).getValue().toString(), #authorized = #authorized or (#cn.matches(\"(?i).*\"+#groupString+\".*\"))}), #authorized"
+        }
+        {%- endif %}
+      ]{%- endif %}
+    }
+  }
+}

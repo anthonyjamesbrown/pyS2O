@@ -1,0 +1,54 @@
+{
+  "id": "{{pfClientId}}",
+  "name": "{{pfClientId}}",
+  "pluginDescriptorRef": {
+    "id": "com.pingidentity.pf.access.token.management.plugins.JwtBearerAccessTokenManagementPlugin"
+  },
+  "parentRef": {
+    "id": "UPN"
+  },
+  "configuration": {
+    "tables": [
+      {
+        "name": "Symmetric Keys",
+        "inherited": true,
+        "rows": []
+      },
+      {
+        "name": "Certificates",
+        "inherited": true
+      }
+    ],
+    "fields": [
+      {
+        "name": "Audience Claim Value",
+        "value": "{{pfClientId}}",
+        "inherited": false
+      {%- if pfSetJWKSPath %}
+      },
+      {
+        "name": "JWKS Endpoint Path",
+        "value": "/oauth/jwks/{{pfClientId}}",
+        "inherited": false
+      }
+      {%- else %}
+      }
+      {%- endif %}
+    ]
+  },
+  "attributeContract": {
+    "inherited": true
+  },
+  "selectionSettings": {
+    "inherited": true
+  },
+  "accessControlSettings": {
+    "allowedClients": [
+      {
+        "id": "{{pfClientId}}"
+      }
+    ],
+    "restrictClients": true,
+    "inherited": false
+  }
+}

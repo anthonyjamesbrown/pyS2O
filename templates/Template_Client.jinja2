@@ -1,0 +1,41 @@
+{
+    "clientId": "{{pfClientId}}",
+    "redirectUris": [
+    {%- for uri in pfRedirectURIs %}
+      "{{uri}}"{%- if not loop.last %},{%- endif %}
+    {%- endfor %}
+    ],
+    "grantTypes": [
+      "{{pfGrantType}}"
+    ],
+    "name": "{{pfClientId}}",
+    "description": "",
+    "logoUrl": "",
+    "defaultAccessTokenManagerRef": {
+      "id": "{{pfClientId}}"
+    },
+    "refreshRolling": "SERVER_DEFAULT",
+    "persistentGrantExpirationType": "SERVER_DEFAULT",
+    "persistentGrantExpirationTime": 0,
+    "persistentGrantExpirationTimeUnit": "DAYS",
+    "bypassApprovalPage": true,
+    "restrictScopes": true,
+    "restrictedScopes": [
+    {%- for scope in pfRestrictedScopes %}
+        "{{scope}}"{%- if not loop.last %},{%- endif %}
+      {%- endfor %}
+    ],
+    "oidcPolicy": {
+      "policyGroup": {
+        "id": "{{pfClientId}}"
+      },
+      "grantAccessSessionRevocationApi": false,
+      "pingAccessLogoutCapable": false
+    },
+    "clientAuth": {
+    {%- if pfGrantType.upper() == 'AUTHORIZATION_CODE'  %}
+      "type": "SECRET",
+      "secret": "{{pfClientSecret}}"
+    {%- endif %}
+    }
+  }

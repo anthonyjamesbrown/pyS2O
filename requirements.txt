@@ -1,0 +1,5 @@
+#
+####### pyS2O-requirements.txt ########
+#
+requests
+jinja2

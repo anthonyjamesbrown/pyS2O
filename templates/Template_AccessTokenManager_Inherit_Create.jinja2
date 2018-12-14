@@ -1,0 +1,53 @@
+{
+  "id": "{{pfClientId}}",
+  "name": "{{pfClientId}}",
+  "pluginDescriptorRef": {
+    "id": "com.pingidentity.pf.access.token.management.plugins.JwtBearerAccessTokenManagementPlugin"
+  },
+  "parentRef": {
+    "id": "{{pfAccessTokenManagerParentId|safe}}"
+  },
+  "configuration": {
+    "tables": [
+      {
+        "name": "Symmetric Keys",
+        "inherited": true,
+        "rows": []
+      },
+      {
+        "name": "Certificates",
+        "inherited": true,
+        "rows": [
+          {
+            "fields": [
+              {
+                "name": "Key ID",
+                "value": "sso.company.com"
+              },
+              {
+                "name": "Certificates",
+                "value": "{{pfssokeyid|safe}}"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "name": "Audience Claim Value",
+        "value": "{{pfClientId}}",
+        "inherited": false
+      }
+    ]
+  },
+  "attributeContract": {
+    "inherited": true
+  },
+  "selectionSettings": {
+    "inherited": true
+  },
+  "accessControlSettings": {
+    "inherited": true
+  }
+}
